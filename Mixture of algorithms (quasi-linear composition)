@@ -1,0 +1,34 @@
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import log_loss
+from sklearn.model_selection import train_test_split
+
+# Generate synthetic data for demonstration
+np.random.seed(42)
+X = np.random.rand(100, 2)
+y = (X[:, 0] + X[:, 1] > 1).astype(int)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the individual classifiers
+svm_classifier = SVC(probability=True)
+rf_classifier = RandomForestClassifier(n_estimators=50)
+
+svm_classifier.fit(X_train, y_train)
+rf_classifier.fit(X_train, y_train)
+
+# Make predictions on the test set
+svm_predictions = svm_classifier.predict_proba(X_test)[:, 1]
+rf_predictions = rf_classifier.predict_proba(X_test)[:, 1]
+
+# Quasi-linear composition
+weight_svm = 0.6
+weight_rf = 0.4
+combined_predictions = (weight_svm * svm_predictions) + (weight_rf * rf_predictions)
+
+# Evaluate competence using cross-entropy loss
+combined_loss = log_loss(y_test, combined_predictions)
+
+print(f"Combined Cross-Entropy Loss: {combined_loss}")
